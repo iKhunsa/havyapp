@@ -3,6 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import rateLimit from 'express-rate-limit';
 import dotenv from 'dotenv';
+import path from 'path';
 import authRoutes from './routes/auth';
 import fitnessRoutes from './routes/fitness';
 
@@ -61,6 +62,18 @@ app.use('/api/fitness', fitnessRoutes);
 
 app.get('/health', (_req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+const staticDir = process.env.STATIC_DIR || path.resolve(process.cwd(), 'public');
+app.use(express.static(staticDir));
+
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/')) {
+    next();
+    return;
+  }
+
+  res.sendFile(path.join(staticDir, 'index.html'));
 });
 
 app.listen(PORT, () => {

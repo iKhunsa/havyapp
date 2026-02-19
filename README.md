@@ -109,6 +109,49 @@ VITE_ENABLE_BACKEND_SYNC=true
 
 Nota: el frontend funciona en modo local-first, por lo que también puede operar sin backend para persistencia en el navegador.
 
+## Docker (Portainer)
+
+Este proyecto incluye un `Dockerfile` de imagen unica (frontend + backend en un solo contenedor).
+
+### Build local
+
+```bash
+docker build -t havyapp:latest .
+```
+
+### Run local
+
+```bash
+docker run --rm -p 3001:3001 \
+  -e JWT_SECRET=change_this_secret \
+  -e CORS_ORIGIN=http://localhost:3001 \
+  havyapp:latest
+```
+
+Abrir: `http://localhost:3001`
+
+### Deploy en Portainer
+
+- Opcion 1: usar imagen GHCR (`ghcr.io/<usuario>/<repo>:latest`).
+- Opcion 2: construir desde este repo con el `Dockerfile` incluido.
+- Variables recomendadas: `JWT_SECRET`, `PORT=3001`, `CORS_ORIGIN`.
+
+## Publicacion en GitHub Packages + Release
+
+Existe un workflow unico: `.github/workflows/docker-package-release.yml`.
+
+- Al crear un tag `v*` (ej. `v1.0.0`), el workflow:
+  - construye y publica la imagen en GHCR,
+  - crea el Release en GitHub,
+  - incluye el digest de la imagen.
+
+Comando sugerido para lanzar release:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
 ## Scripts útiles
 
 - `npm run dev`: desarrollo frontend.
