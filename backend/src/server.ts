@@ -12,8 +12,26 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 const isProduction = process.env.NODE_ENV === 'production';
+
+const normalizeOrigin = (value: string): string | null => {
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+
+  try {
+    const url = new URL(trimmed);
+    return url.origin;
+  } catch {
+    return null;
+  }
+};
+
+const envOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
+  .split(',')
+  .map(normalizeOrigin)
+  .filter((origin): origin is string => Boolean(origin));
+
 const allowedOrigins = new Set([
-  process.env.CORS_ORIGIN || 'http://localhost:5173',
+  ...envOrigins,
   'http://localhost:5173',
   'http://localhost:8080',
   'http://localhost:8081',
@@ -46,7 +64,7 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-app.use(cors({
+const apiCors = cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.has(origin)) {
       callback(null, true);
@@ -55,13 +73,14 @@ app.use(cors({
     callback(new Error('Origin not allowed by CORS'));
   },
   credentials: true
-}));
+});
 
 app.use(express.json());
 
 // Apply rate limiting
 app.use('/api/', limiter);
 app.use('/api/auth/', authLimiter);
+app.use('/api/', apiCors);
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -80,6 +99,12 @@ app.get('*', (req, res, next) => {
     return;
   }
 
+  if (path.extname(req.path)) {
+    res.status(404).end();
+    return;
+  }
+
+  res.set('Cache-Control', 'no-store');
   res.sendFile(path.join(staticDir, 'index.html'));
 });
 
