@@ -1,73 +1,152 @@
-# Welcome to your Lovable project
+# HavyApp - Guía de Entrenamiento y Progreso
 
-## Project info
+Aplicación web full-stack para planificar entrenamientos, registrar sesiones, controlar volumen, gestionar nutrición y seguir el progreso físico con enfoque práctico y visual.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+## Qué hace este proyecto
 
-## How can I edit this code?
+- Plan semanal por días con grupos musculares, orden de ejercicios y videos de referencia.
+- Registro de entrenamiento por ejercicio (series, peso, repeticiones, tempo, notas y fallo).
+- Control de volumen con historial editable, filtros por tiempo y carga manual de sesiones.
+- Seguimiento de peso corporal con métricas y visualización de tendencia.
+- Módulo de nutrición con perfil de macros y planificación de comidas por día.
+- Perfil con exportación CSV de historial (entrenos y peso), idioma y ajustes de cuenta.
 
-There are several ways of editing your application.
+## Módulos principales (frontend)
 
-**Use Lovable**
+- `Entrenamiento` (`/`): rutina del día, checklist persistente por día y registro rápido.
+- `Plan semanal` (`/plan`): crear/editar plan activo, ejercicios y orden.
+- `Nutrición` (`/nutrition`): objetivos y comidas por día.
+- `Peso` (`/weight`): evolución corporal.
+- `Volumen` (`/volume`): historial técnico de entrenamientos.
+- `Progreso` (`/progress`): análisis por ejercicio con gráficas.
+- `Perfil` (`/prefil`): exportación de datos y preferencias.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+## Arquitectura
 
-Changes made via Lovable will be committed automatically to this repo.
+- Frontend: React + TypeScript + Vite + Tailwind + shadcn/ui.
+- Estado y datos: `DataProvider` con persistencia local por usuario (`localStorage`) y sincronización de estado UI mediante `StoreSync`.
+- Autenticación actual: local (en navegador), con sesiones persistentes por token local.
+- Backend (Node/Express): API de auth y fitness con JWT, CORS, Helmet y rate limiting.
+- Testing: Vitest + Testing Library (frontend) y Vitest + Supertest (backend).
 
-**Use your preferred IDE**
+## Stack técnico
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- UI/UX: `tailwindcss`, `radix-ui`, `lucide-react`, `sonner`.
+- Datos/Charts: `recharts`, utilidades de cálculo fitness/nutrición.
+- DnD/Reordenamiento: `@dnd-kit/*`.
+- Backend: `express`, `jsonwebtoken`, `bcryptjs`, `helmet`, `cors`, `express-rate-limit`.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+## Estructura del repositorio
 
-Follow these steps:
+```txt
+.
+├─ src/                 # Frontend React
+│  ├─ pages/            # Pantallas principales
+│  ├─ components/       # Componentes UI y feature components
+│  ├─ contexts/         # Auth, data, language
+│  ├─ hooks/            # Hooks de acceso a estado y datos
+│  ├─ lib/              # Utilidades y manejo de errores
+│  └─ stores/           # Store auxiliar (zustand)
+├─ backend/             # API Express + tests
+│  ├─ src/routes/       # auth y fitness endpoints
+│  ├─ src/middleware/   # auth JWT
+│  ├─ src/stores/       # store en memoria por usuario
+│  └─ src/tests/        # tests backend
+└─ supabase/            # migraciones históricas incluidas en repo
+```
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## Requisitos
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- Node.js 18+
+- npm 9+
 
-# Step 3: Install the necessary dependencies.
-npm i
+## Instalación y ejecución
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+### 1) Frontend
+
+```bash
+npm install
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+Frontend disponible en `http://localhost:5173`.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### 2) Backend (opcional pero recomendado)
 
-**Use GitHub Codespaces**
+```bash
+cd backend
+npm install
+npm run dev
+```
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+Backend disponible en `http://localhost:3001`.
 
-## What technologies are used for this project?
+### 3) Levantar ambos juntos
 
-This project is built with:
+Desde la raíz:
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+```bash
+npm run dev:full
+```
 
-## How can I deploy this project?
+## Variables de entorno
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+### Backend (`backend/.env`)
 
-## Can I connect a custom domain to my Lovable project?
+```env
+PORT=3001
+JWT_SECRET=change_this_secret
+CORS_ORIGIN=http://localhost:5173
+NODE_ENV=development
+```
 
-Yes, you can!
+### Frontend (`.env`)
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+```env
+VITE_API_URL=http://localhost:3001/api
+VITE_ENABLE_BACKEND_SYNC=true
+```
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Nota: el frontend funciona en modo local-first, por lo que también puede operar sin backend para persistencia en el navegador.
+
+## Scripts útiles
+
+- `npm run dev`: desarrollo frontend.
+- `npm run build`: build producción frontend.
+- `npm run test`: tests frontend.
+- `npm run lint`: lint frontend.
+- `npm run typecheck`: type checking frontend.
+- `npm run check`: pipeline completo frontend + backend (build, test, lint).
+
+En `backend/`:
+
+- `npm run dev`: desarrollo backend.
+- `npm run build`: compilar backend.
+- `npm run test`: tests backend.
+
+## Endpoints principales (backend)
+
+- Auth: `POST /api/auth/register`, `POST /api/auth/login`, `GET /api/auth/me`, `POST /api/auth/logout`.
+- Fitness:
+  - Workouts: `GET/POST/PATCH/DELETE /api/fitness/workouts`
+  - Weights: `GET/POST/PATCH/DELETE /api/fitness/weights`
+  - Plans: `GET/POST/PATCH/DELETE /api/fitness/plans`, `POST /api/fitness/plans/:id/activate`
+  - Profile: `GET/POST /api/fitness/profile`
+  - Meals: `GET/POST /api/fitness/meals`
+
+## Seguridad y validación
+
+- JWT para endpoints protegidos.
+- Rate limiting general y específico de auth.
+- Helmet + CORS por origen permitido.
+- Validación de email/password y manejo explícito de errores de almacenamiento.
+
+## Estado actual del producto
+
+- App funcional para uso diario personal y tracking progresivo.
+- Flujo de datos unificado entre módulos de entrenamiento, volumen y progreso.
+- Diseñada para iterar rápido con enfoque local-first y backend extensible.
+
+## Licencia
+
+Pendiente de definir (`MIT` recomendado si deseas hacerlo open-source).
