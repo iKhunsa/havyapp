@@ -125,10 +125,10 @@ docker compose build
 ### Run local
 
 ```bash
-JWT_SECRET=change_this_secret CORS_ORIGIN=http://localhost docker compose up -d
+JWT_SECRET=change_this_secret CORS_ORIGIN=http://localhost:18743 APP_PORT=18743 docker compose up -d
 ```
 
-Abrir: `http://localhost`
+Abrir: `http://localhost:18743`
 
 ### Deploy en Portainer
 

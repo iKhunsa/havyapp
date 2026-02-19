@@ -14,7 +14,7 @@ services:
       NODE_ENV: production
       PORT: 3001
       JWT_SECRET: ${JWT_SECRET}
-      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost}
+      CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:18743}
     expose:
       - "3001"
     healthcheck:
@@ -36,5 +36,5 @@ services:
       backend:
         condition: service_healthy
     ports:
-      - "${APP_PORT:-80}:80"
+      - "${APP_PORT:-18743}:80"
 ```
