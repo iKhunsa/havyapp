@@ -111,30 +111,30 @@ Nota: el frontend funciona en modo local-first, por lo que también puede operar
 
 ## Docker (Portainer)
 
-Este proyecto incluye un `Dockerfile` de imagen unica (frontend + backend en un solo contenedor).
+Este proyecto incluye despliegue profesional en 2 servicios:
+
+- `frontend` (Nginx + SPA React)
+- `backend` (API Node/Express)
 
 ### Build local
 
 ```bash
-docker build -t havyapp:latest .
+docker compose build
 ```
 
 ### Run local
 
 ```bash
-docker run --rm -p 3001:3001 \
-  -e JWT_SECRET=change_this_secret \
-  -e CORS_ORIGIN=http://localhost:3001 \
-  havyapp:latest
+JWT_SECRET=change_this_secret CORS_ORIGIN=http://localhost docker compose up -d
 ```
 
-Abrir: `http://localhost:3001`
+Abrir: `http://localhost`
 
 ### Deploy en Portainer
 
-- Opcion 1: usar imagen GHCR (`ghcr.io/<usuario>/<repo>:latest`).
-- Opcion 2: construir desde este repo con el `Dockerfile` incluido.
-- Variables recomendadas: `JWT_SECRET`, `PORT=3001`, `CORS_ORIGIN`.
+- Build method: `Git repository`.
+- Compose path: `docker-compose.yml`.
+- Variables recomendadas: `JWT_SECRET`, `CORS_ORIGIN`, `APP_PORT`.
 
 ## Publicacion en GitHub Packages + Release
 
