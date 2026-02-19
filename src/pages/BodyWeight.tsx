@@ -231,14 +231,14 @@ export default function BodyWeight() {
   
   return (
     <Layout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in">
         <header className="space-y-1">
           <p className="text-xs text-muted-foreground uppercase tracking-widest">{text('Control', 'Tracking')}</p>
-          <h1 className="text-2xl font-bold tracking-tight">{text('Peso corporal', 'Body weight')}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">{text('Peso corporal', 'Body weight')}</h1>
         </header>
         
         {/* Quick stats */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="card-clinical p-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{text('Peso actual', 'Current weight')}</p>
             <p className="text-2xl font-bold">{latestWeight.toFixed(1)}<span className="text-sm text-muted-foreground ml-1">kg</span></p>
@@ -262,7 +262,7 @@ export default function BodyWeight() {
             <span>{text('Registrar peso de hoy', "Log today's weight")}</span>
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex flex-col sm:flex-row gap-3">
             <div className="flex-1">
               <Label htmlFor="weight" className="sr-only">{text('Peso (kg)', 'Weight (kg)')}</Label>
               <Input
@@ -275,8 +275,9 @@ export default function BodyWeight() {
                 className="text-lg"
               />
             </div>
-            <Button type="submit" size="icon">
+            <Button type="submit" className="sm:w-auto w-full gap-2" size="sm">
               <Plus className="w-5 h-5" />
+              <span>{text('Anadir', 'Add')}</span>
             </Button>
           </div>
         </form>
@@ -347,7 +348,7 @@ export default function BodyWeight() {
                   <div key={log.id} className="card-clinical p-3 flex items-center justify-between gap-2">
                     {isEditing ? (
                       <>
-                        <div className="flex-1 flex items-center gap-2">
+                        <div className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                           <Input
                             type="number"
                             step="0.1"

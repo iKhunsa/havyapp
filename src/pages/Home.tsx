@@ -118,21 +118,21 @@ export default function Home() {
   
   return (
     <Layout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in">
         {/* Header with status */}
         <header className="space-y-3">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-3">
             <div>
               <p className="text-xs text-muted-foreground uppercase tracking-widest">
                 {getDayLabel(getCurrentDay(), language)} — {new Date().toLocaleDateString(locale, { day: 'numeric', month: 'long' })}
               </p>
-              <h1 className="text-2xl font-bold tracking-tight">{text('Entrenamiento', 'Workout')}</h1>
+              <h1 className="text-xl sm:text-2xl font-bold tracking-tight">{text('Entrenamiento', 'Workout')}</h1>
             </div>
           </div>
         </header>
         
         {/* Day selector */}
-        <div className="flex gap-1 overflow-x-auto pb-2">
+        <div className="flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory">
           {DAYS.map((day) => {
             const dayItem = plan?.items.find(i => i.day === day);
             const isSelected = selectedDay === day;
@@ -145,7 +145,7 @@ export default function Home() {
                 key={day}
                 onClick={() => setSelectedDay(day)}
                 className={cn(
-                  'flex-shrink-0 px-4 py-3 rounded-md text-sm font-medium transition-colors relative min-w-[60px]',
+                  'snap-start flex-shrink-0 px-3 py-2 rounded-md text-sm font-medium transition-colors relative min-w-[72px]',
                   isSelected 
                     ? 'bg-secondary text-secondary-foreground' 
                     : 'bg-muted/30 text-muted-foreground hover:bg-muted/50',
@@ -163,7 +163,7 @@ export default function Home() {
         
         {/* Day info */}
         {!isRestDay && (
-          <div className="card-clinical p-4 flex items-center justify-between">
+            <div className="card-clinical p-3 sm:p-4 flex items-center justify-between gap-3">
             <div>
               <p className="text-sm text-muted-foreground">{text('Grupos musculares', 'Muscle groups')}</p>
               <div className="flex gap-1.5 flex-wrap mt-1">
@@ -220,8 +220,8 @@ export default function Home() {
                   style={{ animationDelay: `${i * 50}ms` }}
                 >
                   {/* Exercise header */}
-                  <div className="p-4 flex items-center justify-between border-b border-border/50">
-                    <div className="flex items-center gap-3">
+                  <div className="p-3 sm:p-4 flex items-start sm:items-center justify-between gap-3 border-b border-border/50">
+                    <div className="flex items-start gap-3 min-w-0">
                       <button
                         onClick={() => toggleChecked(exercise.id)}
                         className={cn(
@@ -233,8 +233,8 @@ export default function Home() {
                       >
                         {isChecked && <Check className="w-4 h-4 text-white" />}
                       </button>
-                      <div>
-                        <p className="font-medium">{exercise.name}</p>
+                      <div className="min-w-0">
+                        <p className="font-medium truncate">{exercise.name}</p>
                         <p className="text-xs text-muted-foreground">
                           {getMuscleGroupLabel(exercise.muscleGroup, language)} · {exercise.restSeconds}s {text('descanso', 'rest')}
                         </p>
@@ -243,11 +243,11 @@ export default function Home() {
                     <Button
                       variant="default"
                       size="sm"
-                      className="gap-1.5"
+                      className="gap-1.5 shrink-0 px-2.5 sm:px-3"
                       onClick={() => openRegisterModal(exercise)}
                     >
                       <ClipboardEdit className="w-4 h-4" />
-                      {text('Registrar', 'Log')}
+                      <span className="hidden sm:inline">{text('Registrar', 'Log')}</span>
                     </Button>
                   </div>
                   

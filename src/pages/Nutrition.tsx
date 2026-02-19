@@ -12,22 +12,22 @@ export default function Nutrition() {
   
   return (
     <Layout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in">
         <header className="space-y-1">
           <p className="text-xs text-muted-foreground uppercase tracking-widest">{text('Funcional', 'Functional')}</p>
-          <h1 className="text-2xl font-bold tracking-tight">{text('Nutricion', 'Nutrition')}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">{text('Nutricion', 'Nutrition')}</h1>
           <p className="text-sm text-muted-foreground">
             {text('Calcula tus macros y planifica tus comidas semanales.', 'Calculate your macros and plan your weekly meals.')}
           </p>
         </header>
         
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="planner" className="gap-2">
+          <TabsList className="grid w-full grid-cols-2 h-auto p-1">
+            <TabsTrigger value="planner" className="gap-2 py-2 text-xs sm:text-sm">
               <CalendarDays className="w-4 h-4" />
               {text('Plan semanal', 'Weekly plan')}
             </TabsTrigger>
-            <TabsTrigger value="calculator" className="gap-2">
+            <TabsTrigger value="calculator" className="gap-2 py-2 text-xs sm:text-sm">
               <Calculator className="w-4 h-4" />
               {text('Calculadora', 'Calculator')}
             </TabsTrigger>

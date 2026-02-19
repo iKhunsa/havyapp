@@ -263,16 +263,16 @@ export default function VolumeControl() {
   
   return (
     <Layout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in">
         <header className="space-y-1">
           <p className="text-xs text-muted-foreground uppercase tracking-widest">{text('Control', 'Tracking')}</p>
-          <h1 className="text-2xl font-bold tracking-tight">{text('Volumen por musculo', 'Volume by muscle')}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">{text('Volumen por musculo', 'Volume by muscle')}</h1>
         </header>
 
-        <div className="flex justify-end">
+        <div className="flex justify-stretch sm:justify-end">
           <Button
             onClick={() => setIsManualDialogOpen(true)}
-            className="gap-2"
+            className="gap-2 w-full sm:w-auto"
           >
             <Dumbbell className="w-4 h-4" />
             {text('Agregar ejercicio manual', 'Add exercise manually')}
@@ -280,7 +280,7 @@ export default function VolumeControl() {
         </div>
         
         {/* Quick stats */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div className="card-clinical p-4">
             <p className="text-xs text-muted-foreground uppercase tracking-wider mb-1">{text('Series totales', 'Total sets')}</p>
             <p className="text-2xl font-bold">{totalSets}</p>

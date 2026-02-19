@@ -1,8 +1,8 @@
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment, useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { 
-  Calendar, 
+  Calendar,
   Dumbbell, 
   TrendingUp, 
   Apple,
@@ -45,6 +45,17 @@ export function Navigation() {
       ],
     },
   ];
+
+  const mobileNavItems = useMemo(
+    () => [
+      { path: '/', label: text('Entreno', 'Workout'), icon: Dumbbell },
+      { path: '/plan', label: text('Plan', 'Plan'), icon: Calendar },
+      { path: '/nutrition', label: text('Nutricion', 'Nutrition'), icon: Apple },
+      { path: '/progress', label: text('Progreso', 'Progress'), icon: TrendingUp },
+      { path: '/prefil', label: text('Perfil', 'Profile'), icon: UserCircle },
+    ],
+    [text],
+  );
   
   const handleSignOut = async () => {
     try {
@@ -59,8 +70,8 @@ export function Navigation() {
   };
   
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar border-t border-sidebar-border md:relative md:border-t-0 md:border-r">
-      <div className="flex md:flex-col md:h-screen md:w-20 lg:w-56">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar/95 backdrop-blur border-t border-sidebar-border md:relative md:border-t-0 md:border-r">
+      <div className="hidden md:flex md:flex-col md:h-screen md:w-24 lg:w-56">
         <div className="hidden md:flex items-center justify-center lg:justify-start gap-3 h-16 border-b border-sidebar-border px-4">
           <div className="w-8 h-8 rounded bg-secondary flex items-center justify-center">
             <Dumbbell className="w-4 h-4 text-foreground" />
@@ -144,31 +155,6 @@ export function Navigation() {
           })}
         </div>
 
-        <div className="md:hidden px-2 pb-2 border-t border-sidebar-border">
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              asChild
-              variant="ghost"
-              size="sm"
-              className="justify-center gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <Link to="/prefil">
-                <UserCircle className="w-4 h-4" />
-                <span>{text('Prefil', 'Profile')}</span>
-              </Link>
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleSignOut}
-              className="justify-center gap-2 text-muted-foreground hover:text-foreground"
-            >
-              <LogOut className="w-4 h-4" />
-              <span>{text('Cerrar sesion', 'Sign out')}</span>
-            </Button>
-          </div>
-        </div>
-        
         {/* User section with sign out */}
         <div className="hidden md:flex flex-col items-center lg:items-stretch gap-2 p-4 border-t border-sidebar-border">
           <Button
@@ -192,6 +178,27 @@ export function Navigation() {
             <span className="hidden lg:block">{text('Cerrar sesion', 'Sign out')}</span>
           </Button>
         </div>
+      </div>
+
+      <div className="md:hidden grid grid-cols-5 gap-1 px-2 py-2">
+        {mobileNavItems.map((item) => {
+          const isActive = location.pathname === item.path || (item.path === '/progress' && isProgressSection);
+          const Icon = item.icon;
+
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                'flex flex-col items-center justify-center gap-1 py-2 rounded-md transition-colors',
+                isActive ? 'bg-sidebar-accent text-sidebar-accent-foreground' : 'text-sidebar-foreground/80 hover:text-sidebar-foreground hover:bg-sidebar-accent/60',
+              )}
+            >
+              <Icon className="w-5 h-5" />
+              <span className="text-[10px] leading-none">{item.label}</span>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );

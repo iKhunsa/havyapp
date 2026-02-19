@@ -5,6 +5,8 @@ import { MetricCard } from '@/components/MetricCard';
 import { WeightProgressChart } from '@/components/WeightProgressChart';
 import { formatDate } from '@/lib/fitness-utils';
 import { TrendingUp, TrendingDown, Minus, Dumbbell } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { 
   LineChart, 
   Line, 
@@ -157,14 +159,18 @@ export default function Progress() {
   
   return (
     <Layout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in">
         <header className="space-y-1">
           <p className="text-xs text-muted-foreground uppercase tracking-widest">{text('Analisis', 'Analysis')}</p>
-          <h1 className="text-2xl font-bold tracking-tight">{text('Progreso real', 'Real progress')}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">{text('Progreso real', 'Real progress')}</h1>
+          <div className="flex gap-2 pt-2">
+            <Button asChild size="sm" variant="outline"><Link to="/weight">{text('Peso', 'Weight')}</Link></Button>
+            <Button asChild size="sm" variant="outline"><Link to="/volume">{text('Volumen', 'Volume')}</Link></Button>
+          </div>
         </header>
         
         {/* Quick stats */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <MetricCard 
              label={text('Entrenos esta semana', 'Workouts this week')}
              value={weeklyWorkouts}
@@ -276,7 +282,7 @@ export default function Progress() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2 text-center">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-center">
                       <div className="bg-muted/30 rounded-lg p-2">
                         <p className="text-xs text-muted-foreground">{text('Inicial', 'Initial')}</p>
                         <p className="font-mono text-sm font-bold">{firstWeight}kg</p>

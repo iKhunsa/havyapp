@@ -164,7 +164,7 @@ export default function WeeklyPlan() {
         <div className="space-y-6 animate-fade-in">
           <header className="space-y-1">
             <p className="text-xs text-muted-foreground uppercase tracking-widest">{text('Configuracion', 'Settings')}</p>
-            <h1 className="text-2xl font-bold tracking-tight">{text('Plan semanal', 'Weekly plan')}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight">{text('Plan semanal', 'Weekly plan')}</h1>
           </header>
           <div className="card-clinical p-6 text-center text-sm text-muted-foreground">
             <p>{text('No hay un plan semanal disponible todavia.', 'There is no weekly plan available yet.')}</p>
@@ -179,13 +179,13 @@ export default function WeeklyPlan() {
   
   return (
     <Layout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in">
         <header className="space-y-1">
           <p className="text-xs text-muted-foreground uppercase tracking-widest">{text('Configuracion', 'Settings')}</p>
-          <h1 className="text-2xl font-bold tracking-tight">{text('Plan semanal', 'Weekly plan')}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">{text('Plan semanal', 'Weekly plan')}</h1>
         </header>
         
-        <div className="flex gap-1 overflow-x-auto pb-2">
+        <div className="flex gap-2 overflow-x-auto pb-1 snap-x snap-mandatory">
           {DAYS.map((day) => {
             const dayItem = plan?.items.find(i => i.day === day);
             const isSelected = selectedDay === day;
@@ -197,7 +197,7 @@ export default function WeeklyPlan() {
                 key={day}
                 onClick={() => setSelectedDay(day)}
                 className={cn(
-                  'flex-shrink-0 px-4 py-3 rounded-md text-sm font-medium transition-colors',
+                  'snap-start flex-shrink-0 px-3 py-2 rounded-md text-sm font-medium transition-colors min-w-[86px]',
                   isSelected ? 'bg-secondary text-secondary-foreground' : 'bg-muted/30 text-muted-foreground hover:bg-muted/50',
                   isRest && !isSelected && 'opacity-50'
                 )}
@@ -233,14 +233,14 @@ export default function WeeklyPlan() {
           </div>
           
           {!selectedMuscleGroups.includes('descanso') && (
-            <div className="card-clinical p-4 space-y-4">
+            <div className="card-clinical p-3 sm:p-4 space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
                   {text('Ejercicios', 'Exercises')} ({selectedItem?.exercises.length || 0})
                 </h3>
                 <Dialog open={isAddingExercise} onOpenChange={setIsAddingExercise}>
                   <DialogTrigger asChild>
-                     <Button variant="ghost" size="sm" className="gap-1.5"><Plus className="w-4 h-4" />{text('Anadir', 'Add')}</Button>
+                    <Button variant="ghost" size="sm" className="gap-1.5 w-full sm:w-auto"><Plus className="w-4 h-4" />{text('Anadir', 'Add')}</Button>
                    </DialogTrigger>
                    <DialogContent className="bg-card border-border">
                      <DialogHeader><DialogTitle>{text('Anadir ejercicio', 'Add exercise')}</DialogTitle></DialogHeader>
@@ -287,19 +287,19 @@ export default function WeeklyPlan() {
               
               <div className="space-y-2">
                 {selectedItem?.exercises.map((exercise, i) => (
-                  <div key={exercise.id} className="flex items-center gap-3 p-3 bg-muted/30 rounded-md group">
+                  <div key={exercise.id} className="flex items-center gap-2 sm:gap-3 p-3 bg-muted/30 rounded-md group">
                     <GripVertical className="w-4 h-4 text-muted-foreground/50" />
                     <span className="text-xs text-muted-foreground w-6">{i + 1}.</span>
-                    <span className="flex-1 text-sm">{exercise.name}</span>
+                    <span className="flex-1 text-sm truncate">{exercise.name}</span>
                     {exercise.videoUrl && <Video className="w-4 h-4 text-status-info" />}
                     <span className="text-xs text-muted-foreground">{exercise.restSeconds}s</span>
                     <button
                       onClick={() => openEditExercise(exercise)}
-                      className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-foreground transition-opacity"
+                      className="text-muted-foreground hover:text-foreground transition-opacity"
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
-                    <button onClick={() => handleRemoveExercise(exercise.id)} className="opacity-0 group-hover:opacity-100 text-destructive transition-opacity">
+                    <button onClick={() => handleRemoveExercise(exercise.id)} className="text-destructive transition-opacity">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>

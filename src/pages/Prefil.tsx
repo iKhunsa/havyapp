@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Download, FileSpreadsheet } from 'lucide-react';
 import type { BodyWeightLog, WorkoutLog } from '@/types/fitness';
+import { toast } from 'sonner';
+import { getErrorFeedback } from '@/lib/app-error';
 
 const toCsvValue = (value: string | number) => {
   const raw = String(value ?? '');
@@ -77,7 +79,7 @@ const downloadCsv = (fileName: string, csv: string) => {
 
 export default function Prefil() {
   const { bodyWeightLogs, workoutLogs } = useData();
-  const { user } = useAuth();
+  const { user, signOut } = useAuth();
   const { text, language, toggleLanguage } = useLanguage();
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
@@ -125,12 +127,24 @@ export default function Prefil() {
     setDateTo('');
   };
 
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast.success(text('Sesion cerrada', 'Signed out'));
+    } catch (error) {
+      const feedback = getErrorFeedback(error, text('No se pudo cerrar la sesion.', 'Could not sign out.'));
+      toast.error(feedback.message, {
+        description: feedback.action,
+      });
+    }
+  };
+
   return (
     <Layout>
-      <div className="space-y-6 animate-fade-in">
+      <div className="space-y-4 sm:space-y-6 animate-fade-in">
         <header className="space-y-1">
           <p className="text-xs text-muted-foreground uppercase tracking-widest">{text('Exportacion', 'Export')}</p>
-          <h1 className="text-2xl font-bold tracking-tight">{text('Prefil', 'Profile')}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">{text('Prefil', 'Profile')}</h1>
           <p className="text-sm text-muted-foreground">
             {text('Descarga tu historial en formato CSV.', 'Download your history in CSV format.')}
           </p>
@@ -142,8 +156,11 @@ export default function Prefil() {
             <p className="text-sm text-muted-foreground">
               {text('Correo', 'Email')}: {user?.email ?? text('No disponible', 'Not available')}
             </p>
-            <Button variant="outline" onClick={toggleLanguage} className="gap-2">
+            <Button variant="outline" onClick={toggleLanguage} className="gap-2 w-full sm:w-auto">
               {text('Idioma', 'Language')}: {language.toUpperCase()}
+            </Button>
+            <Button variant="outline" onClick={() => void handleSignOut()} className="w-full sm:w-auto">
+              {text('Cerrar sesion', 'Sign out')}
             </Button>
           </div>
 
