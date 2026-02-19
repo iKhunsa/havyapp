@@ -22,11 +22,7 @@ const allowedOrigins = new Set([
 // Security middleware
 app.use(helmet({
   hsts: false,
-  contentSecurityPolicy: {
-    directives: {
-      'upgrade-insecure-requests': null,
-    },
-  },
+  contentSecurityPolicy: false,
 }));
 
 // Rate limiting
