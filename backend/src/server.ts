@@ -91,7 +91,24 @@ app.get('/health', (_req, res) => {
 });
 
 const staticDir = process.env.STATIC_DIR || path.resolve(process.cwd(), 'public');
-app.use(express.static(staticDir));
+app.use(express.static(staticDir, {
+  index: false,
+  setHeaders: (res, filePath) => {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-store');
+      return;
+    }
+
+    if (filePath.includes(`${path.sep}assets${path.sep}`)) {
+      res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
+    }
+  },
+}));
+
+app.get('/', (_req, res) => {
+  res.set('Cache-Control', 'no-store');
+  res.sendFile(path.join(staticDir, 'index.html'));
+});
 
 app.get('*', (req, res, next) => {
   if (req.path.startsWith('/api/')) {
