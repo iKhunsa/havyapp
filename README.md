@@ -111,21 +111,18 @@ Nota: el frontend funciona en modo local-first, por lo que también puede operar
 
 ## Docker (Portainer)
 
-Este proyecto incluye despliegue profesional en 2 servicios:
-
-- `frontend` (Nginx + SPA React)
-- `backend` (API Node/Express)
+Este proyecto incluye despliegue estable en un solo servicio (`app`) usando la imagen publicada en GHCR.
 
 ### Build local
 
 ```bash
-docker compose build
+docker pull ghcr.io/ikhunsa/havyapp:v1.0.0
 ```
 
 ### Run local
 
 ```bash
-JWT_SECRET=change_this_secret CORS_ORIGIN=http://localhost:18743 APP_PORT=18743 docker compose up -d
+JWT_SECRET=change_this_secret CORS_ORIGIN=http://localhost:18743 APP_PORT=18743 TAG=v1.0.0 docker compose up -d
 ```
 
 Abrir: `http://localhost:18743`
@@ -134,12 +131,7 @@ Abrir: `http://localhost:18743`
 
 - Build method: `Git repository`.
 - Compose path: `docker-compose.yml`.
-- Variables recomendadas: `JWT_SECRET`, `CORS_ORIGIN`, `APP_PORT`.
-
-Si tu entorno (ej. Umbrel OS) tiene problemas con el despliegue separado frontend/backend, usa el stack simplificado sin Nginx:
-
-- Compose path: `docker-compose.umbrel.yml`
-- Variables: `JWT_SECRET`, `CORS_ORIGIN`, `APP_PORT`, `TAG`
+- Variables recomendadas: `JWT_SECRET`, `CORS_ORIGIN`, `APP_PORT`, `TAG`.
 
 ## Publicacion en GitHub Packages + Release
 
