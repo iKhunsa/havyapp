@@ -136,6 +136,11 @@ Abrir: `http://localhost:18743`
 - Compose path: `docker-compose.yml`.
 - Variables recomendadas: `JWT_SECRET`, `CORS_ORIGIN`, `APP_PORT`.
 
+Si tu entorno (ej. Umbrel OS) tiene problemas con el despliegue separado frontend/backend, usa el stack simplificado sin Nginx:
+
+- Compose path: `docker-compose.umbrel.yml`
+- Variables: `JWT_SECRET`, `CORS_ORIGIN`, `APP_PORT`, `TAG`
+
 ## Publicacion en GitHub Packages + Release
 
 Existe un workflow unico: `.github/workflows/docker-package-release.yml`.
