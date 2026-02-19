@@ -116,13 +116,13 @@ Este proyecto incluye despliegue estable en un solo servicio (`app`) usando la i
 ### Build local
 
 ```bash
-docker pull ghcr.io/ikhunsa/havyapp:v1.0.0
+docker pull ghcr.io/ikhunsa/havyapp:v1.0.4
 ```
 
 ### Run local
 
 ```bash
-JWT_SECRET=change_this_secret CORS_ORIGIN=http://localhost:18743 APP_PORT=18743 TAG=v1.0.0 docker compose up -d
+JWT_SECRET=change_this_secret CORS_ORIGIN=http://localhost:18743 APP_PORT=18743 TAG=v1.0.4 docker compose up -d
 ```
 
 Abrir: `http://localhost:18743`
