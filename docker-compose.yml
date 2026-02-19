@@ -1,6 +1,6 @@
 services:
   app:
-    image: ghcr.io/ikhunsa/havyapp:${TAG:-v1.0.4}
+    image: ghcr.io/ikhunsa/havyapp:${TAG:-v1.0.6}
     pull_policy: always
     container_name: havyapp_app
     restart: unless-stopped
