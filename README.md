@@ -1,4 +1,4 @@
-# HavyApp - Guía de Entrenamiento y Progreso
+# DinoFit - Guía de Entrenamiento y Progreso
 
 Aplicación web full-stack para planificar entrenamientos, registrar sesiones, controlar volumen, gestionar nutrición y seguir el progreso físico con enfoque práctico y visual.
 

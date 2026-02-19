@@ -73,10 +73,8 @@ export function Navigation() {
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-sidebar/95 backdrop-blur border-t border-sidebar-border md:relative md:border-t-0 md:border-r">
       <div className="hidden md:flex md:flex-col md:h-screen md:w-24 lg:w-56">
         <div className="hidden md:flex items-center justify-center lg:justify-start gap-3 h-16 border-b border-sidebar-border px-4">
-          <div className="w-8 h-8 rounded bg-secondary flex items-center justify-center">
-            <Dumbbell className="w-4 h-4 text-foreground" />
-          </div>
-          <span className="hidden lg:block font-semibold text-sm tracking-wide">ANTIEGO</span>
+          <img src="/logo.svg" alt="DinoFit" className="w-8 h-8 object-contain" />
+          <img src="/logo-wide.svg" alt="DinoFit" className="hidden lg:block h-6 w-auto object-contain" />
         </div>
         
         <div className="flex md:flex-col flex-1 overflow-x-auto md:overflow-x-visible md:overflow-y-auto py-1 md:py-4 gap-1 px-2 md:px-2">

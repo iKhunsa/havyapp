@@ -3,7 +3,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Dumbbell, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { z } from 'zod';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -106,11 +106,9 @@ export function LoginPage() {
       <div className="w-full max-w-sm space-y-8">
         {/* Logo and Title */}
         <div className="text-center space-y-4">
-          <div className="w-16 h-16 mx-auto bg-primary/10 rounded-2xl flex items-center justify-center">
-            <Dumbbell className="w-8 h-8 text-primary" />
-          </div>
+          <img src="/logo.svg" alt="DinoFit" className="w-16 h-16 mx-auto object-contain" />
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight">Fitness Tracker</h1>
+            <h1 className="text-2xl font-bold tracking-tight">DinoFit</h1>
             <p className="text-muted-foreground text-sm">
               {isRegister ? text('Crea tu cuenta', 'Create your account') : text('Inicia sesion para continuar', 'Sign in to continue')}
             </p>
