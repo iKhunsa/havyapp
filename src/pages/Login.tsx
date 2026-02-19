@@ -106,13 +106,10 @@ export function LoginPage() {
       <div className="w-full max-w-sm space-y-8">
         {/* Logo and Title */}
         <div className="text-center space-y-4">
-          <img src="/logo.svg" alt="DinoFit" className="w-16 h-16 mx-auto object-contain" />
-          <div className="space-y-2">
-            <h1 className="text-2xl font-bold tracking-tight">DinoFit</h1>
-            <p className="text-muted-foreground text-sm">
-              {isRegister ? text('Crea tu cuenta', 'Create your account') : text('Inicia sesion para continuar', 'Sign in to continue')}
-            </p>
-          </div>
+          <img src="/logo.svg" alt="DinoFit" className="w-56 sm:w-64 mx-auto object-contain" />
+          <p className="text-muted-foreground text-sm">
+            {isRegister ? text('Crea tu cuenta', 'Create your account') : text('Inicia sesion para continuar', 'Sign in to continue')}
+          </p>
         </div>
 
         {/* Form */}
