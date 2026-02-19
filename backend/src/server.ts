@@ -23,6 +23,10 @@ const allowedOrigins = new Set([
 app.use(helmet({
   hsts: false,
   contentSecurityPolicy: false,
+  crossOriginOpenerPolicy: false,
+  originAgentCluster: false,
+  crossOriginResourcePolicy: false,
+  crossOriginEmbedderPolicy: false,
 }));
 
 // Rate limiting
