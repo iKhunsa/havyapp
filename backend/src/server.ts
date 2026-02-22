@@ -26,7 +26,7 @@ const normalizeOrigin = (value: string): string | null => {
   }
 };
 
-const envOrigins = (process.env.CORS_ORIGIN || 'http://localhost:5173')
+const envOrigins = (process.env.CORS_ORIGINS || process.env.CORS_ORIGIN || 'http://localhost:5173')
   .split(',')
   .map(normalizeOrigin)
   .filter((origin): origin is string => Boolean(origin));
@@ -37,6 +37,11 @@ const allowedOrigins = new Set([
   'http://localhost:8080',
   'http://localhost:8081',
 ]);
+
+const isOriginAllowed = (origin: string): boolean => {
+  const normalizedOrigin = normalizeOrigin(origin);
+  return Boolean(normalizedOrigin && allowedOrigins.has(normalizedOrigin));
+};
 
 // Security middleware
 app.use(helmet({
@@ -67,13 +72,17 @@ const authLimiter = rateLimit({
 
 const apiCors = cors({
   origin: (origin, callback) => {
-    if (!origin || allowedOrigins.has(origin)) {
+    if (!origin || isOriginAllowed(origin)) {
       callback(null, true);
       return;
     }
-    callback(new Error('Origin not allowed by CORS'));
+    if (!isProduction) {
+      console.warn(`Blocked CORS origin: ${origin}`);
+    }
+    callback(null, false);
   },
-  credentials: true
+  credentials: true,
+  optionsSuccessStatus: 204,
 });
 
 app.use(express.json());
@@ -82,6 +91,16 @@ app.use(express.json());
 app.use('/api/', limiter);
 app.use('/api/auth/', authLimiter);
 app.use('/api/', apiCors);
+app.options('/api/*', apiCors);
+app.use('/api/', (req, res, next) => {
+  const origin = req.headers.origin;
+  if (!origin || isOriginAllowed(origin)) {
+    next();
+    return;
+  }
+
+  res.status(403).json({ error: 'Origin not allowed by CORS' });
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
