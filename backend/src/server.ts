@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import path from 'path';
 import authRoutes from './routes/auth';
 import fitnessRoutes from './routes/fitness';
+import { db, initDatabase } from './db/client';
 
 dotenv.config();
 
@@ -125,8 +126,18 @@ app.get('*', (req, res, next) => {
   res.sendFile(path.join(staticDir, 'index.html'));
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
-  console.log(`🔒 Security enabled: Helmet + Rate Limiting`);
-  console.log(`🌐 CORS enabled for: ${Array.from(allowedOrigins).join(', ')}`);
+const start = async () => {
+  await initDatabase();
+
+  app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+    console.log(`🔒 Security enabled: Helmet + Rate Limiting`);
+    console.log(`🌐 CORS enabled for: ${Array.from(allowedOrigins).join(', ')}`);
+    console.log('🗄️ PostgreSQL connected and schema ready');
+  });
+};
+
+void start().catch((error) => {
+  console.error('❌ Failed to initialize server', error);
+  void db.end().finally(() => process.exit(1));
 });

@@ -1,15 +1,89 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { AuthProvider, useAuth } from '../useAuth';
 import type { ReactNode } from 'react';
 
-describe('useAuth local mode', () => {
+describe('useAuth backend mode', () => {
   const wrapper = ({ children }: { children: ReactNode }) => (
     <AuthProvider>{children}</AuthProvider>
   );
 
+  const users = new Map<string, { id: string; email: string; password: string }>();
+  const sessions = new Map<string, string>();
+
+  const makeResponse = (status: number, body: unknown) => ({
+    ok: status >= 200 && status < 300,
+    status,
+    json: async () => body,
+  }) as Response;
+
+  const parseBody = (init?: RequestInit) => {
+    if (!init?.body || typeof init.body !== 'string') return {};
+    try {
+      return JSON.parse(init.body) as Record<string, unknown>;
+    } catch {
+      return {};
+    }
+  };
+
+  const nextId = () => `u_${Math.random().toString(36).slice(2, 10)}`;
+
+  const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+    const url = String(input);
+    const method = init?.method ?? 'GET';
+    const payload = parseBody(init);
+    const authHeader = (init?.headers as Record<string, string> | undefined)?.Authorization;
+
+    if (url.endsWith('/api/auth/register') && method === 'POST') {
+      const email = String(payload.email ?? '').toLowerCase();
+      const password = String(payload.password ?? '');
+      if (users.has(email)) {
+        return makeResponse(400, { error: 'User already exists' });
+      }
+      const id = nextId();
+      users.set(email, { id, email, password });
+      const token = `test-token-${id}`;
+      sessions.set(token, id);
+      return makeResponse(201, { user: { id, email }, token });
+    }
+
+    if (url.endsWith('/api/auth/login') && method === 'POST') {
+      const email = String(payload.email ?? '').toLowerCase();
+      const password = String(payload.password ?? '');
+      const user = users.get(email);
+      if (!user || user.password !== password) {
+        return makeResponse(401, { error: 'Invalid credentials' });
+      }
+      const token = `test-token-${user.id}`;
+      sessions.set(token, user.id);
+      return makeResponse(200, { user: { id: user.id, email: user.email }, token });
+    }
+
+    if (url.endsWith('/api/auth/me') && method === 'GET') {
+      const token = authHeader?.replace('Bearer ', '') ?? '';
+      const userId = sessions.get(token);
+      if (!userId) return makeResponse(401, { error: 'Invalid token' });
+      const user = Array.from(users.values()).find((item) => item.id === userId);
+      if (!user) return makeResponse(401, { error: 'Invalid token' });
+      return makeResponse(200, { user: { id: user.id, email: user.email } });
+    }
+
+    if (url.endsWith('/api/auth/logout') && method === 'POST') {
+      return makeResponse(200, { message: 'Logged out successfully' });
+    }
+
+    return makeResponse(404, { error: 'Not found' });
+  });
+
   beforeEach(() => {
+    users.clear();
+    sessions.clear();
     localStorage.clear();
+    vi.stubGlobal('fetch', fetchMock);
+  });
+
+  afterEach(() => {
+    vi.unstubAllGlobals();
   });
 
   it('initializes unauthenticated when no session exists', async () => {
@@ -41,7 +115,7 @@ describe('useAuth local mode', () => {
     });
 
     expect(result.current.user?.email).toBe('new@example.com');
-    expect(localStorage.getItem('auth_token')).toContain('local-');
+    expect(localStorage.getItem('auth_token')).toContain('test-token-');
   });
 
   it('rejects duplicate registrations', async () => {

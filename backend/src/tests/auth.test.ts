@@ -1,4 +1,11 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { fitnessRepositoryMock, resetMockRepository, userRepositoryMock } from './mockRepository';
+
+vi.mock('../db/repository', () => ({
+  userRepository: userRepositoryMock,
+  fitnessRepository: fitnessRepositoryMock,
+}));
+
 import request from 'supertest';
 import express from 'express';
 import authRoutes from '../routes/auth';
@@ -9,8 +16,7 @@ app.use('/api/auth', authRoutes);
 
 describe('Auth API', () => {
   beforeEach(() => {
-    // Clear users map before each test
-    // Note: In a real implementation, we'd need to expose a way to clear the store
+    resetMockRepository();
   });
 
   describe('POST /api/auth/register', () => {

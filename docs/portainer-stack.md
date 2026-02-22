@@ -1,3 +1,8 @@
+# Portainer Stack (.yaml) - PostgreSQL Persistente
+
+```yaml
+version: "3.8"
+
 services:
   db:
     image: postgres:16-alpine
@@ -14,8 +19,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 12
-    networks:
-      - havyapp_net
 
   app:
     build:
@@ -50,3 +53,4 @@ networks:
 
 volumes:
   havyapp_pgdata:
+```

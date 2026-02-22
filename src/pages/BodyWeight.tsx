@@ -1,7 +1,6 @@
 import { useState, useMemo } from 'react';
 import { Layout } from '@/components/Layout';
 import { useData } from '@/hooks/useData';
-import { useFitnessStore } from '@/stores/fitnessStore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -24,7 +23,6 @@ import { formatDate } from '@/lib/fitness-utils';
 import type { BodyWeightLog } from '@/types/fitness';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getErrorFeedback } from '@/lib/app-error';
-import { isAppError } from '@/lib/app-error';
 
 type TimeFilter = 'all' | '7d' | '30d' | '90d' | 'month' | 'year' | 'custom';
 
@@ -43,14 +41,6 @@ export default function BodyWeight() {
     updateBodyWeightLog,
     deleteBodyWeightLog,
   } = useData();
-  const {
-    bodyWeightLogs: storeWeightLogs,
-    updateBodyWeightLog: updateBodyWeightLogStore,
-    deleteBodyWeightLog: deleteBodyWeightLogStore,
-  } = useFitnessStore();
-  const safeStoreWeightLogs = useMemo(() => storeWeightLogs ?? [], [storeWeightLogs]);
-  const safeUpdateBodyWeightLogStore = updateBodyWeightLogStore ?? (() => undefined);
-  const safeDeleteBodyWeightLogStore = deleteBodyWeightLogStore ?? (() => undefined);
   const [weight, setWeight] = useState('');
   const [timeFilter, setTimeFilter] = useState<TimeFilter>('all');
   const [customStart, setCustomStart] = useState('');
@@ -64,25 +54,11 @@ export default function BodyWeight() {
   // Delete confirmation
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
   
-  const mergedLogs = useMemo(() => {
-    const byId = new Map<string, BodyWeightLog>();
-
-    for (const log of safeStoreWeightLogs) {
-      byId.set(log.id, log);
-    }
-
-    for (const log of dataWeightLogs) {
-      byId.set(log.id, log);
-    }
-
-    return Array.from(byId.values());
-  }, [dataWeightLogs, safeStoreWeightLogs]);
-
   const sortedLogs = useMemo(() => {
-    return [...mergedLogs].sort(
+    return [...dataWeightLogs].sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
-  }, [mergedLogs]);
+  }, [dataWeightLogs]);
   
   const filteredLogs = useMemo(() => {
     if (sortedLogs.length === 0) return [];
@@ -180,21 +156,11 @@ export default function BodyWeight() {
     
     try {
       await updateBodyWeightLog(logId, { weight: weightValue, date: parsedDate });
-      safeUpdateBodyWeightLogStore(logId, { weight: weightValue, date: parsedDate });
       setEditingId(null);
       setEditWeight('');
       setEditDate('');
       toast.success(text('Peso actualizado', 'Weight updated'));
     } catch (error) {
-      if (isAppError(error) && error.code === 'RECORD_NOT_FOUND') {
-        safeUpdateBodyWeightLogStore(logId, { weight: weightValue, date: parsedDate });
-        setEditingId(null);
-        setEditWeight('');
-        setEditDate('');
-        toast.success(text('Peso actualizado', 'Weight updated'));
-        return;
-      }
-
       const feedback = getErrorFeedback(error, text('No se pudo actualizar el peso.', 'Could not update weight.'));
       toast.error(feedback.message, {
         description: feedback.action,
@@ -205,17 +171,9 @@ export default function BodyWeight() {
   const confirmDelete = async (logId: string) => {
     try {
       await deleteBodyWeightLog(logId);
-      safeDeleteBodyWeightLogStore(logId);
       setDeleteConfirmId(null);
       toast.success(text('Registro eliminado', 'Record deleted'));
     } catch (error) {
-      if (isAppError(error) && error.code === 'RECORD_NOT_FOUND') {
-        safeDeleteBodyWeightLogStore(logId);
-        setDeleteConfirmId(null);
-        toast.success(text('Registro eliminado', 'Record deleted'));
-        return;
-      }
-
       const feedback = getErrorFeedback(error, text('No se pudo eliminar el registro.', 'Could not delete record.'));
       toast.error(feedback.message, {
         description: feedback.action,

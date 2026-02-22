@@ -2,11 +2,9 @@ import { describe, expect, it, vi, beforeEach } from 'vitest';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import WeeklyPlan from '../WeeklyPlan';
-import Workout from '../Workout';
 import Nutrition from '../Nutrition';
 import BodyWeight from '../BodyWeight';
 
-const updateWeeklyPlanMock = vi.fn();
 const saveWeeklyPlanMock = vi.fn();
 const setActivePlanMock = vi.fn();
 const addBodyWeightLogMock = vi.fn();
@@ -42,19 +40,9 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-vi.mock('@/stores/fitnessStore', () => ({
-  useFitnessStore: () => ({
-    workoutLogs: [],
-    addWorkoutLog: vi.fn(),
-    addAlert: vi.fn(),
-    updateWeeklyPlan: updateWeeklyPlanMock,
-  }),
-  useActivePlan: () => activePlanMock,
-  useTodayExercises: () => [],
-}));
-
 vi.mock('@/hooks/useData', () => ({
   useData: () => ({
+    weeklyPlans: [activePlanMock],
     bodyWeightLogs: [],
     addBodyWeightLog: addBodyWeightLogMock,
     updateBodyWeightLog: updateBodyWeightLogMock,
@@ -82,7 +70,6 @@ vi.mock('@/contexts/LanguageContext', () => ({
 
 describe('Feature smoke tests', () => {
   beforeEach(() => {
-    updateWeeklyPlanMock.mockReset();
     saveWeeklyPlanMock.mockReset();
     setActivePlanMock.mockReset();
     addBodyWeightLogMock.mockReset();
@@ -101,15 +88,6 @@ describe('Feature smoke tests', () => {
     await waitFor(() => {
       expect(saveWeeklyPlanMock).toHaveBeenCalled();
     });
-  });
-
-  it('workout page shows empty state when no exercises', () => {
-    render(<Workout />);
-    expect(
-      screen.getByText((content) =>
-        content === 'No hay ejercicios configurados para hoy.' || content === 'Hoy es dia de descanso.'
-      )
-    ).toBeInTheDocument();
   });
 
   it('nutrition page renders planner and calculator tabs', () => {

@@ -19,13 +19,13 @@ Aplicación web full-stack para planificar entrenamientos, registrar sesiones, c
 - `Peso` (`/weight`): evolución corporal.
 - `Volumen` (`/volume`): historial técnico de entrenamientos.
 - `Progreso` (`/progress`): análisis por ejercicio con gráficas.
-- `Perfil` (`/prefil`): exportación de datos y preferencias.
+- `Perfil` (`/profile`): exportación de datos y preferencias.
 
 ## Arquitectura
 
 - Frontend: React + TypeScript + Vite + Tailwind + shadcn/ui.
-- Estado y datos: `DataProvider` con persistencia local por usuario (`localStorage`) y sincronización de estado UI mediante `StoreSync`.
-- Autenticación actual: local (en navegador), con sesiones persistentes por token local.
+- Estado y datos: `DataProvider` + `useLocalData` con fuente principal backend API.
+- Persistencia: PostgreSQL en backend (con migracion de datos legacy localStorage al iniciar sesion).
 - Backend (Node/Express): API de auth y fitness con JWT, CORS, Helmet y rate limiting.
 - Testing: Vitest + Testing Library (frontend) y Vitest + Supertest (backend).
 
@@ -46,14 +46,17 @@ Aplicación web full-stack para planificar entrenamientos, registrar sesiones, c
 │  ├─ contexts/         # Auth, data, language
 │  ├─ hooks/            # Hooks de acceso a estado y datos
 │  ├─ lib/              # Utilidades y manejo de errores
-│  └─ stores/           # Store auxiliar (zustand)
+│  └─ types/            # Tipos de dominio
 ├─ backend/             # API Express + tests
+│  ├─ src/db/           # Cliente PostgreSQL + repositorio
 │  ├─ src/routes/       # auth y fitness endpoints
 │  ├─ src/middleware/   # auth JWT
-│  ├─ src/stores/       # store en memoria por usuario
 │  └─ src/tests/        # tests backend
-└─ supabase/            # migraciones históricas incluidas en repo
+├─ docs/                # fases de cleanup, persistencia y estructura
+└─ public/              # favicon, logos, manifest, robots, sitemap
 ```
+
+Estructura detallada: `docs/project-structure.md`
 
 ## Requisitos
 
@@ -107,22 +110,28 @@ VITE_API_URL=http://localhost:3001/api
 VITE_ENABLE_BACKEND_SYNC=true
 ```
 
-Nota: el frontend funciona en modo local-first, por lo que también puede operar sin backend para persistencia en el navegador.
+Nota: la persistencia principal ahora es server-side con PostgreSQL.
 
 ## Docker (Portainer)
 
-Este proyecto incluye despliegue estable en un solo servicio (`app`) usando la imagen publicada en GHCR.
+Este proyecto incluye despliegue con 2 servicios: `app` + `db` (PostgreSQL persistente).
 
 ### Build local
 
 ```bash
-docker pull ghcr.io/ikhunsa/havyapp:v1.0.4
+docker compose build
 ```
 
 ### Run local
 
 ```bash
-JWT_SECRET=change_this_secret CORS_ORIGIN=http://localhost:18743 APP_PORT=18743 TAG=v1.0.4 docker compose up -d
+JWT_SECRET=change_this_secret \
+POSTGRES_USER=dinofit \
+POSTGRES_PASSWORD=dinofitpass \
+POSTGRES_DB=dinofit \
+CORS_ORIGIN=http://localhost:18743 \
+APP_PORT=18743 \
+docker compose up -d
 ```
 
 Abrir: `http://localhost:18743`
@@ -131,7 +140,7 @@ Abrir: `http://localhost:18743`
 
 - Build method: `Git repository`.
 - Compose path: `docker-compose.yml`.
-- Variables recomendadas: `JWT_SECRET`, `CORS_ORIGIN`, `APP_PORT`, `TAG`.
+- Variables recomendadas: `JWT_SECRET`, `CORS_ORIGIN`, `APP_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`.
 
 ## Publicacion en GitHub Packages + Release
 

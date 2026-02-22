@@ -1,6 +1,5 @@
 import { useState } from 'react';
 import { Layout } from '@/components/Layout';
-import { useActivePlan } from '@/stores/fitnessStore';
 import { getDayLabel, getMuscleGroupLabel } from '@/lib/fitness-utils';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -19,8 +18,8 @@ const MUSCLE_GROUPS: MuscleGroup[] = ['pecho', 'espalda', 'hombros', 'biceps', '
 
 export default function WeeklyPlan() {
   const { text, language } = useLanguage();
-  const plan = useActivePlan();
-  const { saveWeeklyPlan, setActivePlan } = useData();
+  const { weeklyPlans, saveWeeklyPlan, setActivePlan } = useData();
+  const plan = weeklyPlans.find((item) => item.isActive) ?? weeklyPlans[0];
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>('lunes');
   const [isAddingExercise, setIsAddingExercise] = useState(false);
   const [newExercise, setNewExercise] = useState({ name: '', videoUrl: '' });

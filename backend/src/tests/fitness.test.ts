@@ -1,4 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fitnessRepositoryMock, resetMockRepository, userRepositoryMock } from './mockRepository';
+
+vi.mock('../db/repository', () => ({
+  userRepository: userRepositoryMock,
+  fitnessRepository: fitnessRepositoryMock,
+}));
+
 import request from 'supertest';
 import express from 'express';
 import authRoutes from '../routes/auth';
@@ -19,6 +26,10 @@ const authUser = async () => {
 };
 
 describe('Fitness API', () => {
+  beforeEach(() => {
+    resetMockRepository();
+  });
+
   it('creates, updates and deletes workout logs', async () => {
     const { token } = await authUser();
 

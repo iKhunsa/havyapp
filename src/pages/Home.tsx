@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { Layout } from '@/components/Layout';
 import { WorkoutRegistrationModal } from '@/components/WorkoutRegistrationModal';
-import { useActivePlan } from '@/stores/fitnessStore';
 import { getCurrentDay, getDayLabel, getMuscleGroupLabel } from '@/lib/fitness-utils';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -10,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { Video, ExternalLink, Check, ClipboardEdit } from 'lucide-react';
 import type { DayOfWeek, Exercise, MuscleGroup } from '@/types/fitness';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useData } from '@/hooks/useData';
 
 const DAYS: DayOfWeek[] = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes', 'sabado', 'domingo'];
 const CHECKED_STORAGE_PREFIX = 'workout_checked_v1';
@@ -44,7 +44,11 @@ const parseCheckedByDay = (raw: string | null): Record<DayOfWeek, string[]> => {
 };
 
 export default function Home() {
-  const plan = useActivePlan();
+  const { weeklyPlans } = useData();
+  const plan = useMemo(
+    () => weeklyPlans.find((item) => item.isActive) ?? weeklyPlans[0],
+    [weeklyPlans],
+  );
   const { text, locale, language } = useLanguage();
   
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>(getCurrentDay());

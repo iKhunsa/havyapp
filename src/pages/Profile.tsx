@@ -77,7 +77,7 @@ const downloadCsv = (fileName: string, csv: string) => {
   URL.revokeObjectURL(url);
 };
 
-export default function Prefil() {
+export default function Profile() {
   const { bodyWeightLogs, workoutLogs } = useData();
   const { user, signOut } = useAuth();
   const { text, language, toggleLanguage } = useLanguage();
@@ -144,7 +144,7 @@ export default function Prefil() {
       <div className="space-y-4 sm:space-y-6 animate-fade-in">
         <header className="space-y-1">
           <p className="text-xs text-muted-foreground uppercase tracking-widest">{text('Exportacion', 'Export')}</p>
-          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">{text('Prefil', 'Profile')}</h1>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight">{text('Perfil', 'Profile')}</h1>
           <p className="text-sm text-muted-foreground">
             {text('Descarga tu historial en formato CSV.', 'Download your history in CSV format.')}
           </p>

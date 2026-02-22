@@ -1,66 +1,45 @@
 import { useEffect, useState, type ReactNode } from 'react';
 import type { User, AuthResponse } from '@/types/auth';
 import { AuthContext, type AuthContextValue } from '@/contexts/auth-context';
-import { AppError, isAppError } from '@/lib/app-error';
+import { AppError } from '@/lib/app-error';
+import { getApiUrl } from '@/lib/api-url';
 
 const TOKEN_KEY = 'auth_token';
-const LOCAL_USERS_KEY = 'local_auth_users_v1';
-const LOCAL_SESSION_KEY = 'local_auth_session_v1';
-
-type LocalUser = User & { password: string; createdAt: string };
-
+const API_URL = getApiUrl();
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 
 const clearSession = () => {
   localStorage.removeItem(TOKEN_KEY);
-  localStorage.removeItem(LOCAL_SESSION_KEY);
 };
 
-const readUsers = (): LocalUser[] => {
-  try {
-    const raw = localStorage.getItem(LOCAL_USERS_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) {
-      throw new AppError({
-        code: 'STORAGE_READ_FAILED',
-        message: 'Stored users data is malformed',
-        userMessage: 'No pudimos leer tus usuarios guardados.',
-        action: 'Recarga la app. Si persiste, borra datos locales del sitio.',
-      });
+async function requestAuth<T>(path: string, init: RequestInit): Promise<T> {
+  const response = await fetch(`${API_URL}/auth${path}`, {
+    ...init,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(init.headers ?? {}),
+    },
+  });
+
+  if (!response.ok) {
+    let message = 'Authentication request failed';
+    try {
+      const payload = await response.json();
+      if (payload?.error) message = payload.error;
+    } catch {
+      // no-op
     }
-    return parsed as LocalUser[];
-  } catch (error) {
-    if (isAppError(error)) {
-      throw error;
-    }
+
     throw new AppError({
-      code: 'STORAGE_READ_FAILED',
-      message: 'Unable to read local users from storage',
-      userMessage: 'No pudimos acceder al almacenamiento local.',
-      action: 'Revisa permisos del navegador y vuelve a intentar.',
-      cause: error,
+      code: 'UNKNOWN',
+      message,
+      userMessage: 'No pudimos completar la autenticacion.',
+      action: 'Verifica tus credenciales o vuelve a intentar.',
     });
   }
-};
 
-const writeUsers = (users: LocalUser[]) => {
-  try {
-    localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
-  } catch (error) {
-    throw new AppError({
-      code: 'STORAGE_WRITE_FAILED',
-      message: 'Unable to persist local users',
-      userMessage: 'No pudimos guardar la cuenta en este dispositivo.',
-      action: 'Libera espacio en el navegador e intenta nuevamente.',
-      cause: error,
-    });
-  }
-};
-
-const createToken = (userId: string) => `local-${userId}-${Date.now().toString(36)}`;
-
-const createUserId = () => `u_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+  return response.json() as Promise<T>;
+}
 
 function useProvideAuth(): AuthContextValue {
   const [user, setUser] = useState<User | null>(null);
@@ -69,35 +48,35 @@ function useProvideAuth(): AuthContextValue {
 
   useEffect(() => {
     const storedToken = localStorage.getItem(TOKEN_KEY);
-    const sessionRaw = localStorage.getItem(LOCAL_SESSION_KEY);
 
-    if (!storedToken || !sessionRaw) {
+    if (!storedToken) {
       setToken(null);
       setUser(null);
       setLoading(false);
       return;
     }
 
-    try {
-      const session = JSON.parse(sessionRaw) as { token: string; userId: string };
-      const users = readUsers();
-      const localUser = users.find((item) => item.id === session.userId);
+    const hydrate = async () => {
+      try {
+        const response = await requestAuth<{ user: User }>('/me', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${storedToken}`,
+          },
+        });
 
-      if (!localUser || session.token !== storedToken) {
+        setToken(storedToken);
+        setUser(response.user);
+      } catch {
         clearSession();
         setToken(null);
         setUser(null);
-      } else {
-        setToken(storedToken);
-        setUser({ id: localUser.id, email: localUser.email });
+      } finally {
+        setLoading(false);
       }
-    } catch {
-      clearSession();
-      setToken(null);
-      setUser(null);
-    } finally {
-      setLoading(false);
-    }
+    };
+
+    void hydrate();
   }, []);
 
   const signUp = async (email: string, password: string) => {
@@ -120,30 +99,15 @@ function useProvideAuth(): AuthContextValue {
       });
     }
 
-    const users = readUsers();
-    const exists = users.some((item) => item.email === normalizedEmail);
-    if (exists) {
-      throw new AppError({
-        code: 'USER_EXISTS',
-        message: 'User already exists',
-        userMessage: 'Este email ya esta registrado.',
-        action: 'Inicia sesion o usa otro email.',
-      });
-    }
+    const response = await requestAuth<AuthResponse>('/register', {
+      method: 'POST',
+      body: JSON.stringify({ email: normalizedEmail, password }),
+    });
 
-    const newUser: LocalUser = {
-      id: createUserId(),
-      email: normalizedEmail,
-      password,
-      createdAt: new Date().toISOString(),
-    };
-
-    writeUsers([...users, newUser]);
-
-    return {
-      user: { id: newUser.id, email: newUser.email },
-      token: '',
-    };
+    localStorage.setItem(TOKEN_KEY, response.token);
+    setToken(response.token);
+    setUser(response.user);
+    return response;
   };
 
   const signIn = async (email: string, password: string) => {
@@ -158,39 +122,30 @@ function useProvideAuth(): AuthContextValue {
       });
     }
 
-    const users = readUsers();
-    const localUser = users.find((item) => item.email === normalizedEmail);
+    const response = await requestAuth<AuthResponse>('/login', {
+      method: 'POST',
+      body: JSON.stringify({ email: normalizedEmail, password }),
+    });
 
-    if (!localUser || localUser.password !== password) {
-      throw new AppError({
-        code: 'INVALID_CREDENTIALS',
-        message: 'Invalid credentials',
-        userMessage: 'Email o contrasena incorrectos.',
-        action: 'Verifica tus credenciales e intenta de nuevo.',
-      });
-    }
-
-    const authToken = createToken(localUser.id);
-    const authUser: User = { id: localUser.id, email: localUser.email };
-
-    try {
-      localStorage.setItem(TOKEN_KEY, authToken);
-      localStorage.setItem(LOCAL_SESSION_KEY, JSON.stringify({ token: authToken, userId: localUser.id }));
-    } catch (error) {
-      throw new AppError({
-        code: 'STORAGE_WRITE_FAILED',
-        message: 'Unable to write auth session into storage',
-        userMessage: 'No pudimos guardar tu sesion.',
-        action: 'Revisa permisos del navegador y vuelve a intentar.',
-        cause: error,
-      });
-    }
-
-    setToken(authToken);
-    setUser(authUser);
+    localStorage.setItem(TOKEN_KEY, response.token);
+    setToken(response.token);
+    setUser(response.user);
   };
 
   const signOut = async () => {
+    if (token) {
+      try {
+        await requestAuth<{ message: string }>('/logout', {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+      } catch {
+        // best effort
+      }
+    }
+
     try {
       clearSession();
     } catch (error) {

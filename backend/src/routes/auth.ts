@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { User, AuthRequest } from '../types';
 import { authMiddleware } from '../middleware/auth';
+import { userRepository } from '../db/repository';
 
 const router = Router();
 const JWT_SECRET = process.env.JWT_SECRET || 'fallback-secret';
@@ -10,8 +11,6 @@ const SALT_ROUNDS = 10;
 
 // Email validation regex (RFC 5322 compliant, simplified)
 const EMAIL_REGEX = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
-
-const users = new Map<string, User>();
 
 const generateId = (): string => {
   return Date.now().toString(36) + Math.random().toString(36).substr(2);
@@ -58,7 +57,7 @@ router.post('/register', async (req, res) => {
     // Normalize email
     const normalizedEmail = email.toLowerCase().trim();
 
-    const existingUser = Array.from(users.values()).find(u => u.email === normalizedEmail);
+    const existingUser = await userRepository.findByEmail(normalizedEmail);
     if (existingUser) {
       return res.status(400).json({ error: 'User already exists' });
     }
@@ -71,7 +70,7 @@ router.post('/register', async (req, res) => {
       createdAt: new Date()
     };
 
-    users.set(user.id, user);
+    await userRepository.create(user);
 
     const token = jwt.sign(
       { id: user.id, email: user.email },
@@ -104,7 +103,7 @@ router.post('/login', async (req, res) => {
     // Normalize email for lookup
     const normalizedEmail = email.toLowerCase().trim();
 
-    const user = Array.from(users.values()).find(u => u.email === normalizedEmail);
+    const user = await userRepository.findByEmail(normalizedEmail);
     if (!user) {
       return res.status(401).json({ error: 'Invalid credentials' });
     }

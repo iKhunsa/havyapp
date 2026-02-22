@@ -1,4 +1,11 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { fitnessRepositoryMock, resetMockRepository, userRepositoryMock } from './mockRepository';
+
+vi.mock('../db/repository', () => ({
+  userRepository: userRepositoryMock,
+  fitnessRepository: fitnessRepositoryMock,
+}));
+
 import request from 'supertest';
 import express from 'express';
 import authRoutes from '../routes/auth';
@@ -21,6 +28,10 @@ const createFrontendSession = async () => {
 };
 
 describe('Frontend -> Backend contract', () => {
+  beforeEach(() => {
+    resetMockRepository();
+  });
+
   it('auth flow used by login/register UI works', async () => {
     const email = `ui.auth.${Date.now()}@example.com`;
     const password = 'password123';

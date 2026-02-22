@@ -52,7 +52,7 @@ export function Navigation() {
       { path: '/plan', label: text('Plan', 'Plan'), icon: Calendar },
       { path: '/nutrition', label: text('Nutricion', 'Nutrition'), icon: Apple },
       { path: '/progress', label: text('Progreso', 'Progress'), icon: TrendingUp },
-      { path: '/prefil', label: text('Perfil', 'Profile'), icon: UserCircle },
+      { path: '/profile', label: text('Perfil', 'Profile'), icon: UserCircle },
     ],
     [text],
   );
@@ -160,9 +160,9 @@ export function Navigation() {
             size="sm"
             className="w-full justify-center lg:justify-start gap-2 text-muted-foreground hover:text-foreground"
           >
-            <Link to="/prefil">
+            <Link to="/profile">
               <UserCircle className="w-4 h-4" />
-              <span className="hidden lg:block">{text('Prefil', 'Profile')}</span>
+              <span className="hidden lg:block">{text('Perfil', 'Profile')}</span>
             </Link>
           </Button>
           <Button

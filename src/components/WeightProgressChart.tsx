@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useFitnessStore } from '@/stores/fitnessStore';
+import { useData } from '@/hooks/useData';
 import { formatDate } from '@/lib/fitness-utils';
 import { Scale, TrendingUp, TrendingDown, Minus, Calendar } from 'lucide-react';
 import { 
@@ -27,7 +27,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 type TimeRange = 'all' | '7d' | '30d' | '90d' | 'custom';
 
 export function WeightProgressChart() {
-  const { bodyWeightLogs } = useFitnessStore();
+  const { bodyWeightLogs } = useData();
   const { text, language } = useLanguage();
   const [timeRange, setTimeRange] = useState<TimeRange>('all');
   const [customStart, setCustomStart] = useState('');

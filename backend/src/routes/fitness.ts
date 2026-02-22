@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { authMiddleware } from '../middleware/auth';
-import { fitnessStore } from '../stores/fitnessStore';
+import { fitnessRepository } from '../db/repository';
 import type { AuthRequest } from '../types';
 import type { DayOfWeek, Meal } from '../types/fitness';
 
@@ -17,10 +17,10 @@ router.use(authMiddleware);
 // ============ WORKOUT LOGS ============
 
 // GET /api/fitness/workouts
-router.get('/workouts', (req: AuthRequest, res) => {
+router.get('/workouts', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
-    const workouts = fitnessStore.getWorkoutLogs(userId);
+    const workouts = await fitnessRepository.getWorkoutLogs(userId);
     res.json({ data: workouts });
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch workouts' });
@@ -28,12 +28,12 @@ router.get('/workouts', (req: AuthRequest, res) => {
 });
 
 // POST /api/fitness/workouts
-router.post('/workouts', (req: AuthRequest, res) => {
+router.post('/workouts', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const workoutData = req.body;
     
-    const newWorkout = fitnessStore.addWorkoutLog(userId, {
+    const newWorkout = await fitnessRepository.saveWorkoutLog(userId, {
       ...workoutData,
       id: typeof workoutData.id === 'string' && workoutData.id.trim().length > 0
         ? workoutData.id
@@ -48,13 +48,16 @@ router.post('/workouts', (req: AuthRequest, res) => {
 });
 
 // PATCH /api/fitness/workouts/:id
-router.patch('/workouts/:id', (req: AuthRequest, res) => {
+router.patch('/workouts/:id', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
-    const updates = req.body;
+    const updates = { ...req.body };
+    if (updates.date) {
+      updates.date = new Date(updates.date);
+    }
     
-    const success = fitnessStore.updateWorkoutLog(userId, id, updates);
+    const success = await fitnessRepository.updateWorkoutLog(userId, id, updates);
     
     if (!success) {
       return res.status(404).json({ error: 'Workout not found' });
@@ -67,12 +70,12 @@ router.patch('/workouts/:id', (req: AuthRequest, res) => {
 });
 
 // DELETE /api/fitness/workouts/:id
-router.delete('/workouts/:id', (req: AuthRequest, res) => {
+router.delete('/workouts/:id', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
     
-    const success = fitnessStore.deleteWorkoutLog(userId, id);
+    const success = await fitnessRepository.deleteWorkoutLog(userId, id);
     
     if (!success) {
       return res.status(404).json({ error: 'Workout not found' });
@@ -87,10 +90,10 @@ router.delete('/workouts/:id', (req: AuthRequest, res) => {
 // ============ BODY WEIGHT LOGS ============
 
 // GET /api/fitness/weights
-router.get('/weights', (req: AuthRequest, res) => {
+router.get('/weights', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
-    const weights = fitnessStore.getBodyWeightLogs(userId);
+    const weights = await fitnessRepository.getBodyWeightLogs(userId);
     res.json({ data: weights });
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch weights' });
@@ -98,12 +101,12 @@ router.get('/weights', (req: AuthRequest, res) => {
 });
 
 // POST /api/fitness/weights
-router.post('/weights', (req: AuthRequest, res) => {
+router.post('/weights', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const weightData = req.body;
     
-    const newWeight = fitnessStore.addBodyWeightLog(userId, {
+    const newWeight = await fitnessRepository.saveBodyWeightLog(userId, {
       ...weightData,
       id: typeof weightData.id === 'string' && weightData.id.trim().length > 0
         ? weightData.id
@@ -118,13 +121,16 @@ router.post('/weights', (req: AuthRequest, res) => {
 });
 
 // PATCH /api/fitness/weights/:id
-router.patch('/weights/:id', (req: AuthRequest, res) => {
+router.patch('/weights/:id', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
-    const updates = req.body;
+    const updates = { ...req.body };
+    if (updates.date) {
+      updates.date = new Date(updates.date);
+    }
     
-    const success = fitnessStore.updateBodyWeightLog(userId, id, updates);
+    const success = await fitnessRepository.updateBodyWeightLog(userId, id, updates);
     
     if (!success) {
       return res.status(404).json({ error: 'Weight log not found' });
@@ -137,12 +143,12 @@ router.patch('/weights/:id', (req: AuthRequest, res) => {
 });
 
 // DELETE /api/fitness/weights/:id
-router.delete('/weights/:id', (req: AuthRequest, res) => {
+router.delete('/weights/:id', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
     
-    const success = fitnessStore.deleteBodyWeightLog(userId, id);
+    const success = await fitnessRepository.deleteBodyWeightLog(userId, id);
     
     if (!success) {
       return res.status(404).json({ error: 'Weight log not found' });
@@ -157,10 +163,10 @@ router.delete('/weights/:id', (req: AuthRequest, res) => {
 // ============ WEEKLY PLANS ============
 
 // GET /api/fitness/plans
-router.get('/plans', (req: AuthRequest, res) => {
+router.get('/plans', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
-    const plans = fitnessStore.getWeeklyPlans(userId);
+    const plans = await fitnessRepository.getWeeklyPlans(userId);
     res.json({ data: plans });
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch plans' });
@@ -168,12 +174,12 @@ router.get('/plans', (req: AuthRequest, res) => {
 });
 
 // POST /api/fitness/plans
-router.post('/plans', (req: AuthRequest, res) => {
+router.post('/plans', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const planData = req.body;
     
-    const newPlan = fitnessStore.addWeeklyPlan(userId, {
+    const newPlan = await fitnessRepository.saveWeeklyPlan(userId, {
       ...planData,
       id: typeof planData.id === 'string' && planData.id.trim().length > 0
         ? planData.id
@@ -188,13 +194,16 @@ router.post('/plans', (req: AuthRequest, res) => {
 });
 
 // PATCH /api/fitness/plans/:id
-router.patch('/plans/:id', (req: AuthRequest, res) => {
+router.patch('/plans/:id', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
-    const updates = req.body;
+    const updates = { ...req.body };
+    if (updates.createdAt) {
+      updates.createdAt = new Date(updates.createdAt);
+    }
     
-    const success = fitnessStore.updateWeeklyPlan(userId, id, updates);
+    const success = await fitnessRepository.updateWeeklyPlan(userId, id, updates);
     
     if (!success) {
       return res.status(404).json({ error: 'Plan not found' });
@@ -207,12 +216,12 @@ router.patch('/plans/:id', (req: AuthRequest, res) => {
 });
 
 // DELETE /api/fitness/plans/:id
-router.delete('/plans/:id', (req: AuthRequest, res) => {
+router.delete('/plans/:id', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
     
-    const success = fitnessStore.deleteWeeklyPlan(userId, id);
+    const success = await fitnessRepository.deleteWeeklyPlan(userId, id);
     
     if (!success) {
       return res.status(404).json({ error: 'Plan not found' });
@@ -225,12 +234,12 @@ router.delete('/plans/:id', (req: AuthRequest, res) => {
 });
 
 // POST /api/fitness/plans/:id/activate
-router.post('/plans/:id/activate', (req: AuthRequest, res) => {
+router.post('/plans/:id/activate', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const { id } = req.params;
     
-    const success = fitnessStore.setActivePlan(userId, id);
+    const success = await fitnessRepository.setActivePlan(userId, id);
     
     if (!success) {
       return res.status(404).json({ error: 'Plan not found' });
@@ -245,10 +254,10 @@ router.post('/plans/:id/activate', (req: AuthRequest, res) => {
 // ============ MACRO PROFILE ============
 
 // GET /api/fitness/profile
-router.get('/profile', (req: AuthRequest, res) => {
+router.get('/profile', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
-    const profile = fitnessStore.getMacroProfile(userId);
+    const profile = await fitnessRepository.getMacroProfile(userId);
     res.json({ data: profile });
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch profile' });
@@ -256,12 +265,12 @@ router.get('/profile', (req: AuthRequest, res) => {
 });
 
 // POST /api/fitness/profile
-router.post('/profile', (req: AuthRequest, res) => {
+router.post('/profile', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const profileData = req.body;
     
-    const profile = fitnessStore.saveMacroProfile(userId, profileData);
+    const profile = await fitnessRepository.saveMacroProfile(userId, profileData);
     
     res.status(201).json({ data: profile });
   } catch (error) {
@@ -272,10 +281,10 @@ router.post('/profile', (req: AuthRequest, res) => {
 // ============ MEAL PLANS ============
 
 // GET /api/fitness/meals
-router.get('/meals', (req: AuthRequest, res) => {
+router.get('/meals', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
-    const mealPlans = fitnessStore.getMealPlans(userId);
+    const mealPlans = await fitnessRepository.getMealPlans(userId);
 
     const mealsByDay: Record<DayOfWeek, Meal[]> = {
       lunes: [],
@@ -298,16 +307,26 @@ router.get('/meals', (req: AuthRequest, res) => {
 });
 
 // POST /api/fitness/meals
-router.post('/meals', (req: AuthRequest, res) => {
+router.post('/meals', async (req: AuthRequest, res) => {
   try {
     const userId = req.user!.id;
     const { day, meals } = req.body;
     
-    fitnessStore.saveMealPlan(userId, day, meals);
+    await fitnessRepository.saveMealPlan(userId, day, meals);
     
     res.status(201).json({ success: true });
   } catch (error) {
     res.status(500).json({ error: 'Failed to save meals' });
+  }
+});
+
+router.post('/import', async (req: AuthRequest, res) => {
+  try {
+    const userId = req.user!.id;
+    await fitnessRepository.importAll(userId, req.body ?? {});
+    res.status(201).json({ success: true });
+  } catch {
+    res.status(500).json({ error: 'Failed to import data' });
   }
 });
 
