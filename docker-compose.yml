@@ -34,6 +34,7 @@ services:
       STATIC_DIR: /app/public
       JWT_SECRET: ${JWT_SECRET}
       CORS_ORIGIN: ${CORS_ORIGIN:-http://localhost:18743}
+      CORS_ORIGINS: ${CORS_ORIGINS:-${CORS_ORIGIN:-http://localhost:18743}}
       DATABASE_URL: postgresql://${POSTGRES_USER:-dinofit}:${POSTGRES_PASSWORD:-dinofitpass}@db:5432/${POSTGRES_DB:-dinofit}
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://localhost:3001/health"]

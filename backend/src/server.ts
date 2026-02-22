@@ -38,9 +38,38 @@ const allowedOrigins = new Set([
   'http://localhost:8081',
 ]);
 
-const isOriginAllowed = (origin: string): boolean => {
+const firstHeaderValue = (value: string | string[] | undefined): string | null => {
+  if (!value) return null;
+  if (Array.isArray(value)) {
+    return value[0]?.trim() || null;
+  }
+  return value.split(',')[0]?.trim() || null;
+};
+
+type OriginCarrier = {
+  headers: Record<string, string | string[] | undefined>;
+  secure?: boolean;
+};
+
+const getRequestOrigin = (req: OriginCarrier): string | null => {
+  const forwardedProto = firstHeaderValue(req.headers['x-forwarded-proto']);
+  const forwardedHost = firstHeaderValue(req.headers['x-forwarded-host']);
+  const host = forwardedHost || firstHeaderValue(req.headers.host);
+
+  if (!host) return null;
+
+  const protocol = forwardedProto || (req.secure ? 'https' : 'http');
+  return normalizeOrigin(`${protocol}://${host}`);
+};
+
+const isOriginAllowed = (origin: string, req?: OriginCarrier): boolean => {
   const normalizedOrigin = normalizeOrigin(origin);
-  return Boolean(normalizedOrigin && allowedOrigins.has(normalizedOrigin));
+  if (!normalizedOrigin) return false;
+  if (allowedOrigins.has(normalizedOrigin)) return true;
+
+  if (!req) return false;
+  const requestOrigin = getRequestOrigin(req);
+  return Boolean(requestOrigin && requestOrigin === normalizedOrigin);
 };
 
 // Security middleware
@@ -70,19 +99,20 @@ const authLimiter = rateLimit({
   legacyHeaders: false,
 });
 
-const apiCors = cors({
-  origin: (origin, callback) => {
-    if (!origin || isOriginAllowed(origin)) {
-      callback(null, true);
-      return;
-    }
-    if (!isProduction) {
-      console.warn(`Blocked CORS origin: ${origin}`);
-    }
-    callback(null, false);
-  },
-  credentials: true,
-  optionsSuccessStatus: 204,
+const apiCors = cors((req, callback) => {
+  const origin = req.headers.origin;
+  const allowed = !origin || isOriginAllowed(origin, req);
+
+  if (!allowed && !isProduction) {
+    const requestOrigin = getRequestOrigin(req);
+    console.warn(`Blocked CORS origin: ${origin} (request origin: ${requestOrigin ?? 'unknown'})`);
+  }
+
+  callback(null, {
+    origin: allowed,
+    credentials: true,
+    optionsSuccessStatus: 204,
+  });
 });
 
 app.use(express.json());
@@ -94,7 +124,7 @@ app.use('/api/', apiCors);
 app.options('/api/*', apiCors);
 app.use('/api/', (req, res, next) => {
   const origin = req.headers.origin;
-  if (!origin || isOriginAllowed(origin)) {
+  if (!origin || isOriginAllowed(origin, req)) {
     next();
     return;
   }

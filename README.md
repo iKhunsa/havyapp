@@ -140,7 +140,7 @@ Abrir: `http://localhost:18743`
 
 - Build method: `Git repository`.
 - Compose path: `docker-compose.yml`.
-- Variables recomendadas: `JWT_SECRET`, `CORS_ORIGIN`, `APP_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`.
+- Variables recomendadas: `JWT_SECRET`, `CORS_ORIGIN` (o `CORS_ORIGINS` separado por comas), `APP_PORT`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`.
 
 ## Publicacion en GitHub Packages + Release
 
